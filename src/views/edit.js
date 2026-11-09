@@ -33,7 +33,13 @@ export async function editView(app, { slug } = {}) {
   const st = {
     id: show?.id ?? null,
     tmdbId: show?.tmdb_id ?? null,
-    preferred: new Set(show?.preferred_seasons ?? []),
+    // Stored [] means "all recommended"; in the form that shows as every box ticked.
+    preferred: new Set(
+      show?.preferred_seasons?.length
+        ? show.preferred_seasons
+        : Array.from({ length: show?.total_seasons ?? 0 }, (_, i) => i + 1)
+    ),
+    shownTotal: show?.total_seasons ?? 0, // season count last rendered
     themes: show?.themes.map((t) => t.name) ?? [],
     cast: show?.cast.map((a) => ({ name: a.name, character: a.character ?? '', tmdb_person_id: null })) ?? [],
     savedCover: show?.cover_url ?? '',
@@ -86,7 +92,7 @@ export async function editView(app, { slug } = {}) {
 
       <section class="block">
         <h2>Recommended seasons</h2>
-        <p class="hint">Tick the ones worth watching. None ticked means all are recommended.</p>
+        <p class="hint">All seasons are ticked by default. Untick the ones not worth watching.</p>
         <div class="season-picks" data-seasons></div>
       </section>
 
@@ -162,7 +168,11 @@ export async function editView(app, { slug } = {}) {
 
   function renderSeasons() {
     const total = Math.min(intOrNull(field('total_seasons').value) ?? 0, 99);
+    // If every season was ticked, keep it that way when the count grows.
+    const allTicked = st.preferred.size === st.shownTotal;
+    for (let n = 1; n <= total; n++) if (allTicked && n > st.shownTotal) st.preferred.add(n);
     for (const n of [...st.preferred]) if (n > total) st.preferred.delete(n);
+    st.shownTotal = total;
     $('[data-seasons]').innerHTML = total
       ? Array.from({ length: total }, (_, i) => i + 1)
           .map((n) => `<label class="season-pick"><input type="checkbox" value="${n}" data-season ${st.preferred.has(n) ? 'checked' : ''} /><span>S${n}</span></label>`)
@@ -298,6 +308,8 @@ export async function editView(app, { slug } = {}) {
       if (y != null && (y < 1900 || y > 2100)) problems.push(`${label} must be between 1900 and 2100.`);
     }
     if (yearStart && yearEnd && yearEnd < yearStart) problems.push('Last year is before first year.');
+    const totalSeasons = intOrNull(field('total_seasons').value);
+    if (totalSeasons && !st.preferred.size) problems.push('Tick at least one recommended season.');
     if (imdbRaw && !imdb) problems.push('IMDb ID should look like tt0903747.');
     for (const name of ['wikipedia_url', 'rotten_tomatoes_url']) {
       const val = field(name).value.trim();
@@ -325,8 +337,9 @@ export async function editView(app, { slug } = {}) {
         title,
         year_start: yearStart,
         year_end: yearEnd,
-        total_seasons: intOrNull(field('total_seasons').value),
-        preferred_seasons: [...st.preferred],
+        total_seasons: totalSeasons,
+        // All ticked is stored as [] ("all recommended"), so a season added later is included.
+        preferred_seasons: st.preferred.size === totalSeasons ? [] : [...st.preferred],
         cover_url: coverUrl || null,
         original_language: field('original_language').value.trim().toLowerCase() || null,
         comments: field('comments').value.trim() || null,
