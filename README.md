@@ -25,7 +25,9 @@ A shareable catalog of TV shows with comments. Vite + vanilla JS, Supabase (Post
 ### 1. Supabase project
 1. Go to https://supabase.com/dashboard → **New project**. Choose a name, a database password, and a region.
 2. **SQL Editor** → **New query** → paste `supabase/migrations/0001_schema.sql` → **Run**.
-3. Repeat with `supabase/migrations/0002_rls_storage.sql`.
+3. Repeat with `supabase/migrations/0002_rls_storage.sql`, then `0003_private_is_owner.sql`.
+
+> Already done for project `kelqhidxwadhbaweavbc` (eu-west-2) via the Supabase connector. Start at step 4.
 4. **Authentication → Users → Add user → Create new user**. Enter your email and a password, and tick **Auto Confirm User**.
 5. Copy that user's **UID**. In the **SQL Editor**, run:
    ```sql
