@@ -123,7 +123,8 @@ export async function refillView(app) {
     renderRow(r.show.id);
     try {
       r.results = (await searchTmdb(r.q)).slice(0, 6);
-      if (r.pick == null) r.pick = bestMatch(r.show, r.results)?.id ?? null;
+      // Already-linked shows are only refilled when you tap a result.
+      if (r.pick == null && !r.show.tmdb_id) r.pick = bestMatch(r.show, r.results)?.id ?? null;
       r.status = '';
     } catch (ex) {
       r.results = [];
