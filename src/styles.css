@@ -315,3 +315,30 @@ input::placeholder, textarea::placeholder { color: color-mix(in oklab, var(--mut
   background: var(--input); border: 1px solid var(--border); font-size: 1rem;
 }
 .icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ---------- Bulk refill ---------- */
+.refill { max-width: 760px; margin: 0 auto; }
+.options { display: grid; gap: 0.4rem; }
+.check { display: flex; align-items: center; gap: 0.6rem; min-height: 36px; font-size: 0.95rem; }
+.check input { width: 20px; height: 20px; accent-color: var(--primary); }
+.refill-list { list-style: none; padding: 0; margin: 0; }
+.refill-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.6rem; margin-bottom: 0.6rem; }
+.refill-head a { color: var(--foreground); text-decoration: none; }
+.refill-head .muted { font-size: 0.8rem; }
+.refill-row.done { border-color: color-mix(in oklab, var(--jewel-emerald) 45%, transparent); }
+.picks { list-style: none; padding: 0; margin: 0.6rem 0 0; display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; scroll-snap-type: x proximity; }
+.pick {
+  display: grid; gap: 0.35rem; width: 112px; padding: 0.4rem; text-align: left; scroll-snap-align: start;
+  background: var(--input); border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px);
+}
+.pick img, .pick .result-noimg { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; background: var(--muted); display: block; }
+.pick span { display: grid; gap: 0.1rem; font-size: 0.8rem; line-height: 1.25; }
+.pick .muted { font-size: 0.75rem; }
+.pick[aria-pressed='true'] { border-color: var(--jewel-emerald); box-shadow: 0 0 0 2px color-mix(in oklab, var(--jewel-emerald) 45%, transparent); }
+.row-status { margin: 0.4rem 0 0; font-size: 0.85rem; color: var(--muted-foreground); }
+.row-status:empty { display: none; }
+.sticky-actions {
+  position: sticky; bottom: 0; padding: 0.75rem 0 calc(env(safe-area-inset-bottom) + 0.75rem);
+  background: linear-gradient(transparent, var(--background) 35%);
+}
+.sticky-actions .btn { flex: 1; }

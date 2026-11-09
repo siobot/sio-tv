@@ -7,6 +7,7 @@ import { actorView } from './views/actor.js';
 import { notFound } from './views/notFound.js';
 import { loginView } from './views/login.js';
 import { editView } from './views/edit.js';
+import { refillView } from './views/refill.js';
 import { initAuth, isSignedIn, onAuthChange, signOut } from './auth.js';
 import { navigate } from './router.js';
 import { esc } from './lib/dom.js';
@@ -34,7 +35,7 @@ if (!isConfigured) {
 function renderNav() {
   const nav = document.getElementById('nav');
   nav.innerHTML = isSignedIn()
-    ? `<a class="btn sm primary" href="/new">+ Add</a><button type="button" class="btn sm ghost" data-signout>Sign out</button>`
+    ? `<a class="btn sm primary" href="/new">+ Add</a><a class="btn sm" href="/refill">Refill</a><button type="button" class="btn sm ghost" data-signout>Sign out</button>`
     : '';
 }
 
@@ -55,6 +56,7 @@ async function start() {
   route('/actor/:slug', guard(actorView));
   route('/new', guard(editView));
   route('/login', guard(loginView));
+  route('/refill', guard(refillView));
   setNotFound(() => notFound(app));
   startRouter();
 }

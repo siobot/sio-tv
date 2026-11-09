@@ -16,12 +16,15 @@ A shareable catalog of TV shows with comments. Vite + vanilla JS, Supabase (Post
 | `/login` | Owner sign-in (not linked from the site; bookmark it) |
 | `/new` | Add a show (owner) |
 | `/show/:slug/edit` | Edit or delete a show (owner) |
+| `/refill` | Bulk refill from TMDB (owner) |
 
 ## Editing (owner)
 1. Open `/login` and sign in. **+ Add** and **Sign out** appear in the top bar; show pages get an **Edit** button.
 2. **+ Add** → search TMDB → pick the right result. Title, years, seasons, language, cover, cast, IMDb and Wikipedia are filled in. Every field stays editable.
 3. Tick recommended seasons, add themes (type and press Enter, or tap a suggestion), write comments (Markdown), add a Rotten Tomatoes URL.
 4. **Add show** / **Save**. The TMDB poster is copied into your Supabase `covers` bucket on save.
+
+**Refill** (top bar) refills many shows at once: it searches TMDB for each show and pre-selects exact title/year matches; you confirm or change the picks. It keeps your comments, themes, recommended seasons, Rotten Tomatoes link and (by default) your titles and existing covers. It adds TMDB's cast with character names and keeps any actors TMDB does not list.
 
 Saving runs `save_show()` in one transaction. Themes and actors are matched case-insensitively, so names stay consistent. Themes and actors no longer used by any show are removed.
 
