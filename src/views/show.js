@@ -3,6 +3,7 @@ import { esc, safeUrl, setTitle } from '../lib/dom.js';
 import { formatYears, languageName, formatSeasonRanges, imdbUrl } from '../lib/format.js';
 import { renderMarkdown } from '../lib/markdown.js';
 import { notFound } from './notFound.js';
+import { isSignedIn } from '../auth.js';
 
 function seasonsBlock(total, preferred) {
   if (!total) return '';
@@ -59,6 +60,7 @@ export async function showView(app, { slug }) {
         </div>
         <div class="detail-title">
           <h1>${esc(show.title)}</h1>
+          ${isSignedIn() ? `<a class="btn sm edit-link" href="/show/${encodeURIComponent(show.slug)}/edit">Edit</a>` : ''}
           ${meta.length ? `<p class="meta">${meta.map(esc).join(' · ')}</p>` : ''}
           ${
             show.themes.length
