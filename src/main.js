@@ -11,8 +11,10 @@ import { refillView } from './views/refill.js';
 import { initAuth, isSignedIn, onAuthChange, signOut } from './auth.js';
 import { navigate } from './router.js';
 import { esc } from './lib/dom.js';
+import { enableSpoilers } from './lib/markdown.js';
 
 const app = document.getElementById('app');
+enableSpoilers(app);
 
 function guard(view) {
   return async (params, query) => {

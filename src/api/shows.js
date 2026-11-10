@@ -4,7 +4,7 @@ import { supabase } from '../supabase.js';
 export async function listShows() {
   const { data, error } = await supabase
     .from('shows')
-    .select('id, slug, title, year_start, year_end, cover_url, show_themes(theme_id)')
+    .select('id, slug, title, year_start, year_end, cover_url, rating, owned, show_themes(theme_id)')
     .order('title');
   if (error) throw error;
   return data.map((s) => ({ ...s, themeIds: s.show_themes.map((t) => t.theme_id) }));
@@ -30,4 +30,11 @@ export async function getShow(slug) {
       .map((sa) => ({ ...sa.actors, character: sa.character })),
     themes: data.show_themes.map((st) => st.themes).sort((a, b) => a.name.localeCompare(b.name)),
   };
+}
+
+/** Owner-only fields (RLS returns nothing for anyone else). */
+export async function getPrivate(showId) {
+  const { data, error } = await supabase.from('show_private').select('last_watched_at').eq('show_id', showId).maybeSingle();
+  if (error) throw error;
+  return data ?? { last_watched_at: null };
 }

@@ -4,7 +4,7 @@ import { supabase } from '../supabase.js';
 export async function getActor(slug) {
   const { data, error } = await supabase
     .from('actors')
-    .select('id, name, slug, show_actors(character, shows(id, slug, title, year_start, year_end, cover_url))')
+    .select('id, name, slug, show_actors(character, shows(id, slug, title, year_start, year_end, cover_url, rating, owned))')
     .eq('slug', slug)
     .maybeSingle();
   if (error) throw error;

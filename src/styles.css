@@ -342,3 +342,41 @@ input::placeholder, textarea::placeholder { color: color-mix(in oklab, var(--mut
   background: linear-gradient(transparent, var(--background) 35%);
 }
 .sticky-actions .btn { flex: 1; }
+
+/* ---------- Rating, owned, private, spoilers ---------- */
+.stars { color: var(--jewel-topaz); letter-spacing: 0.08em; font-size: 1.05rem; white-space: nowrap; }
+.stars .stars-off { color: color-mix(in oklab, var(--muted-foreground) 35%, transparent); }
+.stars.compact { display: block; font-size: 0.8rem; margin-top: 0.1rem; }
+.badges { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0.5rem 0 0; }
+.owned-pill, .owned-badge {
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--jewel-emerald);
+  background: color-mix(in oklab, var(--jewel-emerald) 15%, var(--background));
+  border: 1px solid color-mix(in oklab, var(--jewel-emerald) 40%, transparent);
+  border-radius: 999px; padding: 0.15rem 0.55rem;
+}
+.owned-badge { position: absolute; top: 6px; right: 6px; font-size: 0.7rem; box-shadow: var(--shadow-elegant); }
+.private-note { font-size: 0.85rem; margin: 0.5rem 0 0; color: var(--foreground); }
+
+.rating-pick { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.rate {
+  min-width: 48px; min-height: 40px; padding: 0 0.6rem; border-radius: 8px;
+  background: var(--input); border: 1px solid var(--border); color: var(--muted-foreground); font-weight: 600;
+}
+.rate[aria-checked='true'] {
+  color: var(--jewel-topaz);
+  border-color: color-mix(in oklab, var(--jewel-topaz) 55%, transparent);
+  background: color-mix(in oklab, var(--jewel-topaz) 14%, transparent);
+}
+.rate.none[aria-checked='true'] { color: var(--foreground); border-color: var(--ring); background: var(--muted); }
+.edit input[type='date'] { max-width: 14rem; }
+
+.spoiler {
+  background: var(--muted); color: transparent; border-radius: 4px; padding: 0 0.2em;
+  cursor: pointer; transition: color 0.15s, background 0.15s;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.spoiler:not(.revealed) * { color: transparent !important; }
+.spoiler:not(.revealed) img { visibility: hidden; }
+.spoiler:hover { background: color-mix(in oklab, var(--muted) 80%, var(--foreground)); }
+.spoiler.revealed { background: color-mix(in oklab, var(--muted) 60%, transparent); color: inherit; cursor: auto; }

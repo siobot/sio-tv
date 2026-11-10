@@ -26,6 +26,10 @@ A shareable catalog of TV shows with comments. Vite + vanilla JS, Supabase (Post
 
 **Refill** (top bar) refills many shows at once: it searches TMDB for each show and pre-selects exact title/year matches; you confirm or change the picks. It keeps your comments, themes, recommended seasons, Rotten Tomatoes link and (by default) your titles and existing covers. It adds TMDB's cast with character names and keeps any actors TMDB does not list.
 
+**Rating** (0–5 stars, 0 allowed; blank = not rated) and **Owned** are public. **Last watched** is visible only to you: it is stored in `show_private`, which only the owner can read.
+
+**Spoilers** in comments: `||hidden text||`. Readers tap to reveal.
+
 Saving runs `save_show()` in one transaction. Themes and actors are matched case-insensitively, so names stay consistent. Themes and actors no longer used by any show are removed.
 
 ## Theme counts
@@ -39,7 +43,7 @@ Saving runs `save_show()` in one transaction. Themes and actors are matched case
 ### 1. Supabase project
 1. Go to https://supabase.com/dashboard → **New project**. Choose a name, a database password, and a region.
 2. **SQL Editor** → **New query** → paste `supabase/migrations/0001_schema.sql` → **Run**.
-3. Repeat with `0002_rls_storage.sql`, `0003_private_is_owner.sql`, then `0004_save_show.sql`.
+3. Repeat with `0002_rls_storage.sql`, `0003_private_is_owner.sql`, `0004_save_show.sql`, then `0005_rating_owned_watched.sql`.
 
 > Steps 1–7 are done for project `kelqhidxwadhbaweavbc` (eu-west-2).
 4. **Authentication → Users → Add user → Create new user**. Enter your email and a password, and tick **Auto Confirm User**.

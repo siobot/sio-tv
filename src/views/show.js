@@ -1,4 +1,5 @@
-import { getShow } from '../api/shows.js';
+import { getShow, getPrivate } from '../api/shows.js';
+import { stars } from '../lib/stars.js';
 import { esc, safeUrl, setTitle } from '../lib/dom.js';
 import { formatYears, languageName, formatSeasonRanges, imdbUrl } from '../lib/format.js';
 import { renderMarkdown } from '../lib/markdown.js';
@@ -44,6 +45,7 @@ function linksBlock(show) {
 export async function showView(app, { slug }) {
   app.innerHTML = '<p class="status">Loading…</p>';
   const show = await getShow(slug);
+  const priv = show && isSignedIn() ? await getPrivate(show.id).catch(() => null) : null;
   if (!show) return notFound(app);
   setTitle(show.title);
 
@@ -60,8 +62,10 @@ export async function showView(app, { slug }) {
         </div>
         <div class="detail-title">
           <h1>${esc(show.title)}</h1>
-          ${isSignedIn() ? `<a class="btn sm edit-link" href="/show/${encodeURIComponent(show.slug)}/edit">Edit</a>` : ''}
           ${meta.length ? `<p class="meta">${meta.map(esc).join(' · ')}</p>` : ''}
+          ${show.rating != null || show.owned ? `<p class="badges">${stars(show.rating)}${show.owned ? '<span class="owned-pill">Owned</span>' : ''}</p>` : ''}
+          ${priv ? `<p class="private-note" title="Only you can see this">Last watched: ${priv.last_watched_at ? esc(new Date(priv.last_watched_at).toLocaleDateString(undefined, { dateStyle: 'medium' })) : 'not recorded'} <span class="muted">(private)</span></p>` : ''}
+          ${isSignedIn() ? `<a class="btn sm edit-link" href="/show/${encodeURIComponent(show.slug)}/edit">Edit</a>` : ''}
           ${
             show.themes.length
               ? `<ul class="tags">${show.themes

@@ -1,4 +1,4 @@
-import { getShow } from '../api/shows.js';
+import { getShow, getPrivate } from '../api/shows.js';
 import {
   searchTmdb, tmdbDetails, tmdbPoster, listSuggestions, uploadCover, removeCover, saveShow, deleteShow,
 } from '../api/edit.js';
@@ -26,6 +26,8 @@ export async function editView(app, { slug } = {}) {
   }
   app.innerHTML = '<p class="status">Loading…</p>';
   const [show, suggestions] = await Promise.all([isNew ? null : getShow(slug), listSuggestions()]);
+  // null = couldn't load; then the date field is disabled and left untouched on save.
+  const priv = show ? await getPrivate(show.id).catch(() => null) : { last_watched_at: null };
   if (!isNew && !show) return notFound(app);
   setTitle(isNew ? 'Add show' : `Edit ${show.title}`);
 
@@ -46,6 +48,7 @@ export async function editView(app, { slug } = {}) {
     cover: show?.cover_url ?? '', // what the preview shows
     pendingBlob: null, // file chosen by the user
     pendingPoster: '', // TMDB poster path to fetch on save
+    rating: show?.rating ?? null,
     busy: false,
   };
 
@@ -113,7 +116,7 @@ export async function editView(app, { slug } = {}) {
       <section class="block">
         <h2>Comments</h2>
         <textarea name="comments" rows="8" placeholder="Why it's worth watching…">${esc(v('comments'))}</textarea>
-        <p class="hint">Blank line between paragraphs. *italic*, **bold**, [link](https://…).</p>
+        <p class="hint">Blank line between paragraphs. *italic*, **bold**, [link](https://…), ||spoiler||.</p>
       </section>
 
       <section class="block">
@@ -131,6 +134,16 @@ export async function editView(app, { slug } = {}) {
         <datalist id="actor-names">${suggestions.actors.map((a) => `<option value="${esc(a.name)}"></option>`).join('')}</datalist>
         <ol class="cast-edit" data-cast></ol>
         <button type="button" class="btn" data-cast-add>Add actor</button>
+      </section>
+
+      <section class="block">
+        <h2>My rating</h2>
+        <div class="rating-pick" role="radiogroup" aria-label="Rating" data-rating></div>
+        <label class="check"><input type="checkbox" name="owned" ${show?.owned ? 'checked' : ''} /> Owned <span class="muted">(shown publicly)</span></label>
+        <label class="field">Last watched <span class="muted">(only you see this)</span>
+          <input name="last_watched" type="date" value="${esc(priv?.last_watched_at ? toDateInput(priv.last_watched_at) : '')}" ${priv ? '' : 'disabled'} />
+          ${priv ? '' : '<span class="hint">Could not load; it will be left unchanged.</span>'}
+        </label>
       </section>
 
       <section class="block">
@@ -178,6 +191,13 @@ export async function editView(app, { slug } = {}) {
           .map((n) => `<label class="season-pick"><input type="checkbox" value="${n}" data-season ${st.preferred.has(n) ? 'checked' : ''} /><span>S${n}</span></label>`)
           .join('')
       : '<span class="muted">Enter the number of seasons first.</span>';
+  }
+
+  function renderRating() {
+    const opts = [[null, 'Not rated'], ...[0, 1, 2, 3, 4, 5].map((n) => [n, `${n}★`])];
+    $('[data-rating]').innerHTML = opts
+      .map(([n, label]) => `<button type="button" role="radio" class="rate${n === null ? ' none' : ''}" data-rate="${n ?? ''}" aria-checked="${st.rating === n}" aria-label="${n === null ? 'Not rated' : `${n} out of 5`}">${label}</button>`)
+      .join('');
   }
 
   function renderCover() {
@@ -347,6 +367,9 @@ export async function editView(app, { slug } = {}) {
         imdb_id: imdb || null,
         wikipedia_url: field('wikipedia_url').value.trim() || null,
         rotten_tomatoes_url: field('rotten_tomatoes_url').value.trim() || null,
+        rating: st.rating,
+        owned: field('owned').checked,
+        ...(priv && { last_watched_at: fromDateInput(field('last_watched').value, priv.last_watched_at) }),
         themes: st.themes.map((name) => ({ name, slug: slugify(name) || 'theme' })),
         cast: st.cast
           .filter((a) => a.name.trim())
@@ -443,6 +466,10 @@ export async function editView(app, { slug } = {}) {
     const d = t.dataset;
     if ('search' in d) runSearch();
     else if (d.tmdbId) applyTmdb(d.tmdbId);
+    else if (d.rate != null) {
+      st.rating = d.rate === '' ? null : Number(d.rate);
+      renderRating();
+    }
     else if ('themeAdd' in d) addTheme($('[data-theme-input]').value);
     else if (d.themePick) addTheme(d.themePick);
     else if (d.themeRemove != null) {
@@ -471,10 +498,25 @@ export async function editView(app, { slug } = {}) {
 
   renderLang();
   renderSeasons();
+  renderRating();
   renderCover();
   renderThemes();
   renderCast();
   if (isNew) field('q').focus();
+}
+
+/** ISO timestamp → "YYYY-MM-DD" in local time. */
+function toDateInput(iso) {
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Date input → ISO timestamp; keeps the original time if the day is unchanged. */
+function fromDateInput(value, original) {
+  if (!value) return null;
+  if (original && toDateInput(original) === value) return original;
+  return new Date(`${value}T12:00:00`).toISOString();
 }
 
 function friendlyError(ex) {
